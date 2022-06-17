@@ -28,7 +28,7 @@ public class VendingMachineCLI {
 		try(Scanner fileInput = new Scanner(itemsInStock)){
 			while(fileInput.hasNextLine()){
 				String thisLine = fileInput.nextLine();
-				String[] item = thisLine.split.split("\\|",-1);
+				String[] item = thisLine.split("\\|",-1);
 				double price = Double.parseDouble(item[2]);
 				switch(item[3]){
 					case "Drink" :
@@ -39,8 +39,8 @@ public class VendingMachineCLI {
 						inventory.put(item[0], new Candy(price, item[1]));
 					case "Gum" :
 						inventory.put(item[0], new Gum(price, item[1]));
-					default :
-						System.err.println("Invalid entry");
+					//default :
+					//	System.err.println("Invalid entry");
 				}
 			}
 		}catch(FileNotFoundException e){
