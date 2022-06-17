@@ -12,8 +12,14 @@ public class VendingMachineCLI {
 
 	private static final String MAIN_MENU_OPTION_DISPLAY_ITEMS = "Display Vending Machine Items";
 	private static final String MAIN_MENU_OPTION_PURCHASE = "Purchase";
-	private static final String[] MAIN_MENU_OPTIONS = { MAIN_MENU_OPTION_DISPLAY_ITEMS, MAIN_MENU_OPTION_PURCHASE };
-	private double balance = 0;
+	private static final String MAIN_MENU_OPTION_EXIT = "Exit";
+	private static final String PURCHASE_MENU_OPTION_FEED = "Feed Money";
+	private static final String PURCHASE_MENU_OPTION_SELECT = "Select Product";
+	private static final String PURCHASE_MENU_OPTION_FINISH = "Finish Transaction";
+	private static final String[] PURCHASE_MENU_OPTIONS = { PURCHASE_MENU_OPTION_FEED, PURCHASE_MENU_OPTION_SELECT, PURCHASE_MENU_OPTION_FINISH };
+	private static final String[] MAIN_MENU_OPTIONS = { MAIN_MENU_OPTION_DISPLAY_ITEMS, MAIN_MENU_OPTION_PURCHASE, MAIN_MENU_OPTION_EXIT };
+
+	private double wallet = 0.00;
 
 	private Menu menu;
 
@@ -39,8 +45,6 @@ public class VendingMachineCLI {
 						inventory.put(item[0], new Candy(price, item[1]));
 					case "Gum" :
 						inventory.put(item[0], new Gum(price, item[1]));
-					//default :
-					//	System.err.println("Invalid entry");
 				}
 			}
 		}catch(FileNotFoundException e){
@@ -48,25 +52,105 @@ public class VendingMachineCLI {
 		}
 	}
 
-//	public String purchase(){
-//	}
+	public void feedMoney() {
+		int money;
+		Scanner input = new Scanner(System.in);
+		System.out.print("Please print a whole dollar amount: ");
+		String userInput = input.nextLine();
+
+		try {
+			money = Integer.parseInt(userInput);
+			if (money < 0) {
+				System.out.println("Please enter a whole dollar amount.");
+
+			} else {
+				wallet += money;
+			}
+
+		} catch(NumberFormatException e){
+			System.out.println("Please enter a whole dollar amount.");
+		}
+
+		return;
+	}
+
+	public void selectProduct(){
+		displayItems();
+		Scanner input = new Scanner(System.in);
+		String walletCheck = "\nCurrent Money Provided: $";
+		System.out.print(walletCheck);
+		System.out.printf("%3.2f", wallet);
+		System.out.print("\nEnter a product code: ");
+		String userInput = input.nextLine();
+		if(!inventory.containsKey(userInput)){
+			System.out.println("Item does not exist.");
+			return;
+		} else if(inventory.get(userInput).getStock() == 0) {
+			System.out.println("Item is sold out.");
+			return;
+		} else if(wallet < inventory.get(userInput).getPrice()){
+			System.out.println("You do not have enough money for this item.");
+		} else{
+			inventory.get(userInput).setStock(inventory.get(userInput).getStock() - 1);
+			System.out.print(inventory.get(userInput).getItemName()+"|$");
+			System.out.printf("%3.2f", inventory.get(userInput).getPrice());
+			System.out.print("|");
+			System.out.printf("%3.2f", wallet - inventory.get(userInput).getPrice());
+			System.out.println("\n" + inventory.get(userInput).getPurchaseMessage());
+			wallet -= inventory.get(userInput).getPrice();
+			return;
+
+		}
+
+	}
+
+
+	public void displayItems(){
+		for(Map.Entry<String, Purchasable> items : inventory.entrySet()) {
+			System.out.print(items.getKey()+"|");
+			System.out.print(items.getValue().getItemName()+"|$");
+			System.out.printf("%3.2f", items.getValue().getPrice());
+			if (items.getValue().getStock() > 0) {
+				System.out.println("|"+items.getValue().getStock());
+			} else {
+				System.out.println("|SOLD OUT");
+			}
+		} return;
+
+	}
+
+	public void displayPurchaseMenu() {
+
+		while (true) {
+			String walletCheck = "\nCurrent Money Provided: $";
+			System.out.print(walletCheck);
+			System.out.printf("%3.2f", wallet);
+			String purchaseChoice = (String) menu.getChoiceFromOptions(PURCHASE_MENU_OPTIONS);
+
+			if (purchaseChoice.equals(PURCHASE_MENU_OPTION_FEED)) {
+				feedMoney();
+			} else if (purchaseChoice.equals(PURCHASE_MENU_OPTION_SELECT)) {
+				selectProduct();
+			} else if (purchaseChoice.equals(PURCHASE_MENU_OPTION_FINISH)) {
+
+			}
+		}
+	}
 
 	public void run() {
 		while (true) {
 			String choice = (String) menu.getChoiceFromOptions(MAIN_MENU_OPTIONS);
 
 			if (choice.equals(MAIN_MENU_OPTION_DISPLAY_ITEMS)) {
-				// display vending machine items
-				for(Map.Entry<String, Purchasable> items : inventory.entrySet()) {
-					if (items.getValue().getStock() == 0) {
-						System.out.println(items.getKey() + "|" + items.getValue().getItemName() + "|" + items.getValue().getPrice() + "|" + "SOLD OUT");
-					} else {
-						System.out.println(items.getKey() + "|" + items.getValue().getItemName() + "|" + items.getValue().getPrice() + "|" + items.getValue().getStock());
-					}
-				}
+				displayItems();
 
 			} else if (choice.equals(MAIN_MENU_OPTION_PURCHASE)) {
 				// do purchase
+				displayPurchaseMenu();
+
+			} else if (choice.equals((MAIN_MENU_OPTION_EXIT))) {
+				System.out.println("Goodbye!");
+				return;
 			}
 		}
 	}
