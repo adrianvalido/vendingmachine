@@ -3,6 +3,7 @@ package com.techelevator;
 import com.techelevator.view.Menu;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -16,6 +17,8 @@ public class VendingMachineCLI {
 
 	private Menu menu;
 
+	Map<String, Purchasable> inventory = new HashMap<String, Purchasable>();
+
 	public VendingMachineCLI(Menu menu) {
 		this.menu = menu;
 	}
@@ -26,20 +29,26 @@ public class VendingMachineCLI {
 			while(fileInput.hasNextLine()){
 				String thisLine = fileInput.nextLine();
 				String[] item = thisLine.split("|");
+				double price = Double.parseDouble(item[2]);
 				switch(item[3]){
 					case "Drink" :
-						Drinks
+						inventory.put(item[0], new Drinks(price, item[1]));
+					case "Chip" :
+						inventory.put(item[0], new Chips(price, item[1]));
+					case "Candy" :
+						inventory.put(item[0], new Candy(price, item[1]));
+					case "Gum" :
+						inventory.put(item[0], new Gum(price, item[1]));
+					default :
+						System.err.println("Invalid entry");
 				}
 			}
-
-
-		}catch(Exception e){
-
+		}catch(FileNotFoundException e){
+			System.err.println("Inventory file not found.");
 		}
 	}
 
 	public String purchase(){
-
 	}
 
 	public void run() {
@@ -55,9 +64,10 @@ public class VendingMachineCLI {
 	}
 
 	public static void main(String[] args) {
+
+
 		Menu menu = new Menu(System.in, System.out);
 		VendingMachineCLI cli = new VendingMachineCLI(menu);
-		Map<String, Purchasable> inventory = new HashMap<String, Purchasable>();
 		cli.run();
 	}
 }
