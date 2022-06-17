@@ -28,7 +28,7 @@ public class VendingMachineCLI {
 		try(Scanner fileInput = new Scanner(itemsInStock)){
 			while(fileInput.hasNextLine()){
 				String thisLine = fileInput.nextLine();
-				String[] item = thisLine.split("|");
+				String[] item = thisLine.split.split("\\|",-1);
 				double price = Double.parseDouble(item[2]);
 				switch(item[3]){
 					case "Drink" :
@@ -48,8 +48,8 @@ public class VendingMachineCLI {
 		}
 	}
 
-	public String purchase(){
-	}
+//	public String purchase(){
+//	}
 
 	public void run() {
 		while (true) {
@@ -57,6 +57,14 @@ public class VendingMachineCLI {
 
 			if (choice.equals(MAIN_MENU_OPTION_DISPLAY_ITEMS)) {
 				// display vending machine items
+				for(Map.Entry<String, Purchasable> items : inventory.entrySet()) {
+					if (items.getValue().getStock() == 0) {
+						System.out.println(items.getKey() + "|" + items.getValue().getItemName() + "|" + items.getValue().getPrice() + "|" + "SOLD OUT");
+					} else {
+						System.out.println(items.getKey() + "|" + items.getValue().getItemName() + "|" + items.getValue().getPrice() + "|" + items.getValue().getStock());
+					}
+				}
+
 			} else if (choice.equals(MAIN_MENU_OPTION_PURCHASE)) {
 				// do purchase
 			}
@@ -64,10 +72,9 @@ public class VendingMachineCLI {
 	}
 
 	public static void main(String[] args) {
-
-
 		Menu menu = new Menu(System.in, System.out);
 		VendingMachineCLI cli = new VendingMachineCLI(menu);
+		cli.stock();
 		cli.run();
 	}
 }
