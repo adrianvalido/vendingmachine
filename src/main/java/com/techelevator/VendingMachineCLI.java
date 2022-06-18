@@ -10,6 +10,9 @@ import java.util.Scanner;
 
 public class VendingMachineCLI {
 
+	private final double QUARTER_VALUE = 0.25;
+	private final double DIME_VALUE = 0.10;
+	private final double NICKEL_VALUE = 0.05;
 	private static final String MAIN_MENU_OPTION_DISPLAY_ITEMS = "Display Vending Machine Items";
 	private static final String MAIN_MENU_OPTION_PURCHASE = "Purchase";
 	private static final String MAIN_MENU_OPTION_EXIT = "Exit";
@@ -19,7 +22,16 @@ public class VendingMachineCLI {
 	private static final String[] PURCHASE_MENU_OPTIONS = { PURCHASE_MENU_OPTION_FEED, PURCHASE_MENU_OPTION_SELECT, PURCHASE_MENU_OPTION_FINISH };
 	private static final String[] MAIN_MENU_OPTIONS = { MAIN_MENU_OPTION_DISPLAY_ITEMS, MAIN_MENU_OPTION_PURCHASE, MAIN_MENU_OPTION_EXIT };
 
+	private Log logger = new Log();
 	private double wallet = 0.00;
+
+	public double getWallet() {
+		return wallet;
+	}
+
+	public void setWallet(double wallet) {
+		this.wallet = wallet;
+	}
 
 	private Menu menu;
 
@@ -64,6 +76,7 @@ public class VendingMachineCLI {
 				System.out.println("Please enter a whole dollar amount.");
 
 			} else {
+				logger.logFeed(money,wallet);
 				wallet += money;
 			}
 
@@ -81,7 +94,7 @@ public class VendingMachineCLI {
 		System.out.print(walletCheck);
 		System.out.printf("%3.2f", wallet);
 		System.out.print("\nEnter a product code: ");
-		String userInput = input.nextLine();
+		String userInput = input.nextLine().toUpperCase();
 		if(!inventory.containsKey(userInput)){
 			System.out.println("Item does not exist.");
 			return;
@@ -91,6 +104,7 @@ public class VendingMachineCLI {
 		} else if(wallet < inventory.get(userInput).getPrice()){
 			System.out.println("You do not have enough money for this item.");
 		} else{
+			logger.logTransactions(userInput,inventory.get(userInput),wallet);
 			inventory.get(userInput).setStock(inventory.get(userInput).getStock() - 1);
 			System.out.print(inventory.get(userInput).getItemName()+"|$");
 			System.out.printf("%3.2f", inventory.get(userInput).getPrice());
@@ -119,6 +133,17 @@ public class VendingMachineCLI {
 
 	}
 
+	public void finishTransaction(){
+		logger.logChange(wallet);
+		int quarterAmount = (int) Math.floor(wallet/QUARTER_VALUE);
+		wallet -= quarterAmount * QUARTER_VALUE;
+		int dimeAmount = (int) Math.floor(wallet/DIME_VALUE);
+		wallet -= dimeAmount * DIME_VALUE;
+		double nickelAmount = Math.floor(wallet/NICKEL_VALUE);
+		wallet -= nickelAmount * NICKEL_VALUE;
+		System.out.println("your change is " + quarterAmount + " quarter(s), " + dimeAmount + " dime(s), and " + (int)nickelAmount + " nickel(s)." );
+	}
+
 	public void displayPurchaseMenu() {
 
 		while (true) {
@@ -132,10 +157,12 @@ public class VendingMachineCLI {
 			} else if (purchaseChoice.equals(PURCHASE_MENU_OPTION_SELECT)) {
 				selectProduct();
 			} else if (purchaseChoice.equals(PURCHASE_MENU_OPTION_FINISH)) {
-
+				finishTransaction();
+				return;
 			}
 		}
 	}
+
 
 	public void run() {
 		while (true) {
